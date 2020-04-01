@@ -1,0 +1,21 @@
+
+first_stag = int(input("Укажите начальную метку: "))
+poryadkovie_nomera_slotov = input('Укажите порядковые номера слотов через пробел: ')
+list_iz_poryadkovih_nomerov_slotov = poryadkovie_nomera_slotov.split()
+number_of_slots = len(list_iz_poryadkovih_nomerov_slotov)
+print("Количество задействованных слотов: ",number_of_slots)
+last_stag = 64 * number_of_slots + 299
+
+while first_stag < last_stag:
+    for i in (list_iz_poryadkovih_nomerov_slotov):
+        for j in range(1,65):
+            print("interface vdsl_1" + "/" + str(i) + "/" + str(j) +
+                  "\nno shutdown" +
+                  "\npvc 2 enable" +
+                  "\nswitchport mode hybrid" +
+                  "\nswitchport vlan " + str(first_stag) + " tag" +
+                  "\nswitchport default vlan " + str(first_stag) + " pvc 2" +
+                  "\nvdsl2 ch1dsdatarate-prf 10MB" +
+                  "\nvdsl2 ch1usdatarate-prf 1MB" +
+                  "\nvdsl2 spectrum-prf ANNEX_AB")
+            first_stag += 1

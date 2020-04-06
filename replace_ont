@@ -1,0 +1,163 @@
+# Проверка техданных
+print("Сверьте технические данные из Технограда с данными по авторизации на сайте - http://92.124.239.7/subscriber_check/\n")
+
+# список ПСЭ
+print("Список ПСЭ: 261,41,420,422,43,454,467,553\n")
+
+mcast_vlan_261 = 100
+mcast_vlan_41 = 61
+mcast_vlan_420 = 80
+mcast_vlan_422 = 81
+mcast_vlan_43 = 80
+mcast_vlan_454 = 111
+mcast_vlan_467 = 70
+mcast_vlan_511 = 84
+mcast_vlan_553 = 224
+
+hvost_tr069 = " gemport 21 multi-service user-vlan  21 tag-transform translate inbound traffic-table index 504 outbound traffic-table index 504"
+hvost_inet = " gemport 22 multi-service user-vlan  22 tag-transform translate inbound traffic-table index 500 outbound traffic-table index 500"
+hvost_iptv = " gemport 24 multi-service user-vlan  24 tag-transform translate inbound traffic-table index 501 outbound traffic-table index 501"
+hvost_sip = " gemport 23 multi-service user-vlan  23 tag-transform translate inbound traffic-table index 502 outbound traffic-table index 502"
+
+vibor_pse = int(input("Выберите ПСЭ из списка: "))
+while vibor_pse not in (261,41,420,422,43,454,467,511,553):
+   print("Введите корректную ПСЭ!")
+   vibor_pse = int(input("Выберите ПСЭ из списка: "))
+
+   
+pryamoi = input("Введите прямой номер в целочисленном формате (10 цифр): ")
+while not(len(pryamoi) == 10 and int(pryamoi[0]) == 3 or int(pryamoi[0]) == 4):
+   print("Введите корректный прямой номер!")
+   pryamoi = input("Введите прямой номер в целочисленном формате (10 цифр): ")
+    
+
+ont_slot = int(input("Введите номер slot от 0 до 10: "))
+while not 0 <= ont_slot < 10:
+   print("Введите корректный номер slot от 0 до 10!")
+   ont_slot = int(input("Введите номер slot от 0 до 10: "))
+    
+ont_gpon_port = int(input("Введите номер gpon-port от 0 до 7: "))
+while not 0 <= ont_gpon_port <= 7:
+   print("Введите корректный номер gpon-port от 0 до 7!")
+   ont_gpon_port = int(input("Введите номер gpon-port от 0 до 7: "))
+    
+ont_id = int(input("Введите номер ont_id от 0 до 63: "))
+while not 0 <= ont_id <= 63:
+   print("Введите корректный номер ont_id от 0 до 63!")
+   ont_id = int(input("Введите номер ont_id от 0 до 63: "))
+    
+new_ont_pon_serial = input("Введите pon-serial новой ONT (16 символов): ")                           
+while not(len(new_ont_pon_serial) == 16 and (int(new_ont_pon_serial[0]) == 5 or int(new_ont_pon_serial[0]) == 4)):
+   print("Введите корректный серийник! ")
+   new_ont_pon_serial = input("Введите pon-serial новой ONT (16 символов): ")
+
+iptv = input("Есть ли у абонента услуга IPTV? Введите 1 - если есть, 0 - нет: ")
+while not ( iptv == "1" or iptv == "0"):
+   print("Введите либо 1, либо 0!")
+   iptv = input("Есть ли у абонента услуга IPTV? Введите 1 - если есть, 0 - нет: ")
+   
+sip = input("Есть ли у абонента услуга SIP-телефония? Введите 1 - если есть, 0 - нет: ")
+while not ( iptv == "1" or iptv == "0"):
+   print("Введите либо 1, либо 0!")
+   iptv = input("Есть ли у абонента услуга SIP-телефония? Введите 1 - если есть, 0 - нет: ")
+
+      
+         
+
+print("\nconfig" +
+      "\nundo service-port port 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " ont " + str(ont_id) +
+      "\n" +
+      "\ny" +
+      "\ninterface gpon 0/" + str(ont_slot) +
+      "\n" +
+      "\nont delete " + str(ont_gpon_port) + " " + str(ont_id) +
+      "\n"
+      "\nont add " + str(ont_gpon_port) + " " + str(ont_id) + " sn " + new_ont_pon_serial + " omci ont-lineprofile-id 1000 ont-srvprofile-id 1000 desc " + str(pryamoi) +
+      "\nont ipconfig " + str(ont_gpon_port) + " " + str(ont_id) + " dhcp vlan 21 priority 7" +
+      "\nont tr069-server-config " + str(ont_gpon_port) + " " + str(ont_id) + " profile-id 1" +
+      "\nquit"
+      "\n" +
+      "\nservice-port vlan name TR-069 gpon 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " ont " + str(ont_id) + hvost_tr069 +
+      "\nservice-port vlan name INET gpon 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " ont " + str(ont_id) + hvost_inet + "\n")
+
+if iptv == "1":
+   if vibor_pse == 261:
+      print("\nservice-port vlan name UNICAST_IPTV gpon 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " ont " + str(ont_id) + hvost_iptv +
+            "\nbtv" +
+            "\nigmp user add port 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " user-vlan 24 no-auth " + "\n" + "\n" +
+            "\nmulticast-vlan " + str(mcast_vlan_261) +
+            "\nigmp multicast-vlan member slot 0/" + str(ont_slot) +
+            "\nquit")
+            
+   elif vibor_pse == 41:
+      print("\nservice-port vlan name UNICAST_IPTV gpon 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " ont " + str(ont_id) + hvost_iptv +
+            "\nbtv" +
+            "\nigmp user add port 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " user-vlan 24 no-auth " + "\n" +
+            "\nmulticast-vlan " + str(mcast_vlan_41) +
+            "\nigmp multicast-vlan member slot 0/" + str(ont_slot) +
+            "\nquit")
+            
+   elif vibor_pse == 420:
+      print("\nservice-port vlan name UNICAST_IPTV gpon 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " ont " + str(ont_id) + hvost_iptv +
+            "\nbtv" +
+            "\nigmp user add port 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " user-vlan 24 no-auth " + "\n" +
+            "\nmulticast-vlan " + str(mcast_vlan_420) +
+            "\nigmp multicast-vlan member slot 0/" + str(ont_slot) +
+            "\nquit")
+            
+   elif vibor_pse == 422:
+      print("\nservice-port vlan name UNICAST_IPTV gpon 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " ont " + str(ont_id) + hvost_iptv +
+            "\nbtv" +
+            "\nigmp user add port 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " user-vlan 24 no-auth " + "\n" +
+            "\nmulticast-vlan " + str(mcast_vlan_422) +
+            "\nigmp multicast-vlan member slot 0/" + str(ont_slot) +
+            "\nquit")
+            
+   elif vibor_pse == 43:
+      print("\nservice-port vlan name UNICAST_IPTV gpon 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " ont " + str(ont_id) + hvost_iptv +
+            "\nbtv" +
+            "\nigmp user add port 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " user-vlan 24 no-auth " + "\n" +
+            "\nmulticast-vlan " + str(mcast_vlan_43) +
+            "\nigmp multicast-vlan member slot 0/" + str(ont_slot) +
+            "\nquit")
+            
+   elif vibor_pse == 454:
+      print("\nservice-port vlan name UNICAST_IPTV gpon 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " ont " + str(ont_id) + hvost_iptv +
+            "\nbtv" +
+            "\nigmp user add port 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " user-vlan 24 no-auth " + "\n" +
+            "\nmulticast-vlan " + str(mcast_vlan_454) +
+            "\nigmp multicast-vlan member slot 0/" + str(ont_slot) +
+            "\nquit")
+            
+   elif vibor_pse == 467:
+      print("\nservice-port vlan name UNICAST_IPTV gpon 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " ont " + str(ont_id) + hvost_iptv +
+            "\nbtv" +
+            "\nigmp user add port 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " user-vlan 24 no-auth " + "\n" +
+            "\nmulticast-vlan " + str(mcast_vlan_467) +
+            "\nigmp multicast-vlan member slot 0/" + str(ont_slot) +
+            "\nquit")
+                        
+   elif vibor_pse == 511:
+      print("\nservice-port vlan name UNICAST_IPTV gpon 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " ont " + str(ont_id) + hvost_iptv +
+            "\nbtv" +
+            "\nigmp user add port 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " user-vlan 24 no-auth " + "\n" +
+            "\nmulticast-vlan " + str(mcast_vlan_511) +
+            "\nigmp multicast-vlan member slot 0/" + str(ont_slot) +
+            "\nquit")
+            
+   elif vibor_pse == 553:
+      print("\nservice-port vlan name UNICAST_IPTV gpon 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " ont " + str(ont_id) + hvost_iptv +
+            "\nbtv" +
+            "\nigmp user add port 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " user-vlan 24 no-auth " + "\n" +
+            "\nmulticast-vlan " + str(mcast_vlan_553) +
+            "\nigmp multicast-vlan member slot 0/" + str(ont_slot) +
+            "\nquit")
+            
+
+if sip == "1":
+   print("\nservice-port vlan name SIP gpon 0/" + str(ont_slot) + "/" + str(ont_gpon_port) + " ont " + str(ont_id) + hvost_sip +
+         "\n\ninterface gpon 0/" + str(ont_slot) +
+         "\nont port native-vlan " + str(ont_gpon_port) + " " + str(ont_id) + " iphost  vlan 23 priority 6" +
+         "\nquit\n")
+
+  

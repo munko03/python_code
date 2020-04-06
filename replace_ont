@@ -57,9 +57,9 @@ while not ( iptv == "1" or iptv == "0"):
    iptv = input("Есть ли у абонента услуга IPTV? Введите 1 - если есть, 0 - нет: ")
    
 sip = input("Есть ли у абонента услуга SIP-телефония? Введите 1 - если есть, 0 - нет: ")
-while not ( iptv == "1" or iptv == "0"):
+while not ( sip == "1" or sip == "0"):
    print("Введите либо 1, либо 0!")
-   iptv = input("Есть ли у абонента услуга SIP-телефония? Введите 1 - если есть, 0 - нет: ")
+   sip = input("Есть ли у абонента услуга SIP-телефония? Введите 1 - если есть, 0 - нет: ")
 
       
          
@@ -160,4 +160,4 @@ if sip == "1":
          "\nont port native-vlan " + str(ont_gpon_port) + " " + str(ont_id) + " iphost  vlan 23 priority 6" +
          "\nquit\n")
 
-  
+
